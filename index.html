@@ -2,84 +2,88 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>DRUNFM | 24/7</title>
+    <title>DRUNFM | PRO</title>
     <style>
-        :root { --neon: #bd00ff; }
+        :root { --neon: #bd00ff; --dark: #05000a; }
         body { 
-            margin: 0; height: 100vh; overflow: hidden;
-            background: radial-gradient(circle at center, #2e004d 0%, #050505 100%);
+            margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle at center, #230046 0%, #000 100%);
+            font-family: 'Inter', sans-serif; color: white; overflow: hidden;
+        }
+
+        /* ФОНОВЫЕ ОБЪЕКТЫ (как на картинке) */
+        .bg-glow { 
+            position: absolute; width: 600px; height: 600px; 
+            background: var(--neon); filter: blur(180px); opacity: 0.2; 
+            animation: pulse 8s infinite alternate; z-index: 0; 
+        }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.3); } }
+
+        /* КОНТЕЙНЕР ПЛЕЕРА */
+        .ui-card { 
+            position: relative; z-index: 1; text-align: center;
+            background: rgba(255,255,255,0.03); backdrop-filter: blur(30px);
+            padding: 50px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ЦЕНТРАЛЬНЫЙ ДИСК */
+        .dial { 
+            width: 150px; height: 150px; border-radius: 50%; 
+            border: 2px dashed var(--neon); margin: 0 auto 30px;
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Inter', sans-serif; color: white;
+            transition: 0.5s; cursor: pointer;
         }
-
-        /* Объекты на фоне (глубина) */
-        .bg-layer { position: absolute; width: 100%; height: 100%; z-index: -1; }
-        .circle { 
-            position: absolute; border-radius: 50%; filter: blur(80px);
-            background: var(--neon); opacity: 0.2; animation: float 10s infinite;
-        }
-
-        .card { 
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(20px);
-            padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
-            text-align: center; width: 280px; box-shadow: 0 0 50px rgba(189,0,255,0.3);
-        }
+        .dial:hover { border-style: solid; box-shadow: 0 0 30px var(--neon); }
 
         #playBtn { 
-            width: 80px; height: 80px; border-radius: 50%; border: none;
-            background: #fff; color: var(--neon); font-size: 24px; 
-            cursor: pointer; transition: 0.3s; margin-bottom: 20px;
+            width: 120px; height: 120px; border-radius: 50%; border: none;
+            background: rgba(255,255,255,0.1); color: white; font-size: 40px;
+            cursor: pointer; backdrop-filter: blur(10px);
         }
-        #playBtn:hover { transform: scale(1.1); box-shadow: 0 0 20px #fff; }
 
-        input[type=range] { width: 100%; accent-color: var(--neon); cursor: pointer; }
-        
-        @keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-50px); } }
+        input[type=range] { width: 100%; accent-color: var(--neon); margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="bg-layer">
-    <div class="circle" style="width: 400px; height: 400px; top: -100px; left: -100px;"></div>
-    <div class="circle" style="width: 300px; height: 300px; bottom: -50px; right: -50px;"></div>
-</div>
+<div class="bg-glow"></div>
 
-<div class="card">
-    <h2 style="margin: 0; color: var(--neon); letter-spacing: 3px;">DRUNFM</h2>
-    <div id="status" style="font-size: 12px; margin-bottom: 20px; opacity: 0.7;">READY</div>
-    <button id="playBtn">▶</button>
+<div class="ui-card">
+    <h1 style="margin: 0; font-size: 24px; letter-spacing: 5px; color: var(--neon);">DRUNFM</h1>
+    <div id="status" style="margin-bottom: 20px; opacity: 0.6;">READY</div>
+    
+    <div class="dial" onclick="toggle()">
+        <button id="playBtn">▶</button>
+    </div>
+
     <input type="range" id="vol" min="0" max="100" value="80">
     <div id="player"></div>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    let player;
-    const btn = document.getElementById('playBtn');
-    const status = document.getElementById('status');
-
+    let player, started = false;
     function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-            videoId: 'eZJx14UhktY',
-            playerVars: { 'playsinline': 1 },
-            events: {
-                'onReady': () => {
-                    btn.onclick = () => {
-                        // Агрессивное включение
-                        player.unMute();
-                        player.playVideo();
-                        status.innerText = "LIVE 24/7";
-                        btn.innerText = "⏸";
-                        btn.onclick = () => {
-                            if(player.getPlayerState() === 1) { player.pauseVideo(); btn.innerText = "▶"; }
-                            else { player.playVideo(); btn.innerText = "⏸"; }
-                        };
-                    };
-                    document.getElementById('vol').oninput = (e) => player.setVolume(e.target.value);
-                }
-            }
-        });
+        player = new YT.Player('player', { videoId: 'eZJx14UhktY' });
     }
+
+    function toggle() {
+        if (!started) {
+            player.playVideo();
+            started = true;
+            document.getElementById('status').innerText = "LIVE 24/7";
+            document.getElementById('playBtn').innerText = "⏸";
+        } else {
+            if (player.getPlayerState() === 1) { 
+                player.pauseVideo(); 
+                document.getElementById('playBtn').innerText = "▶"; 
+            } else { 
+                player.playVideo(); 
+                document.getElementById('playBtn').innerText = "⏸"; 
+            }
+        }
+    }
+    document.getElementById('vol').oninput = (e) => player.setVolume(e.target.value);
 </script>
 </body>
 </html>
