@@ -2,55 +2,57 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>DRUNFM | Control Center</title>
+    <title>DRUNFM | PRO UI</title>
     <style>
-        :root { --neon: #bd00ff; --glass: rgba(255, 255, 255, 0.1); }
-        
+        :root { --neon: #bd00ff; --dark: #050505; }
         body { 
-            margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
-            background: radial-gradient(circle, #2e004d 0%, #050505 100%);
-            font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden;
+            margin: 0; height: 100vh; overflow: hidden;
+            background: radial-gradient(circle at center, #1a0033 0%, #000 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Inter', sans-serif;
         }
 
-        /* Анимация фона */
-        .bg-glow {
-            position: absolute; width: 600px; height: 600px;
-            background: var(--neon); filter: blur(150px); opacity: 0.15;
-            animation: move 10s infinite alternate; z-index: -1;
+        /* Анимированные частицы фона */
+        .particles { position: absolute; width: 100%; height: 100%; z-index: -1; }
+        .particle { 
+            position: absolute; border-radius: 50%; opacity: 0.3;
+            background: var(--neon); filter: blur(50px);
+            animation: drift 15s infinite alternate;
         }
 
-        @keyframes move { from { transform: translate(-20%, -20%); } to { transform: translate(20%, 20%); } }
-
-        .ui-card { 
-            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(20px);
-            padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
-            text-align: center; width: 300px; box-shadow: 0 0 40px rgba(189,0,255,0.2);
+        /* Панель управления */
+        .card { 
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 50px; border-radius: 40px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
         #playBtn { 
-            width: 80px; height: 80px; border-radius: 50%; border: none;
-            background: white; color: var(--neon); font-size: 30px; cursor: pointer;
-            margin-bottom: 20px; transition: 0.3s;
+            width: 100px; height: 100px; border-radius: 50%; border: 2px solid white;
+            background: transparent; color: white; font-size: 30px; cursor: pointer;
+            transition: 0.4s; margin-bottom: 30px;
         }
-        #playBtn:hover { transform: scale(1.1); box-shadow: 0 0 20px white; }
+        #playBtn:hover { background: white; color: var(--neon); transform: scale(1.1); }
 
-        input[type=range] { 
-            width: 100%; margin-top: 20px; accent-color: var(--neon); cursor: pointer;
-        }
-        
-        #status { font-weight: bold; text-transform: uppercase; margin-bottom: 10px; color: var(--neon); }
-        #player { display: none; }
+        input[type=range] { width: 100%; accent-color: var(--neon); }
+
+        @keyframes drift { 0% { transform: translate(0,0); } 100% { transform: translate(50px, 100px); } }
     </style>
 </head>
 <body>
 
-<div class="bg-glow"></div>
+<div class="particles">
+    <div class="particle" style="width: 300px; height: 300px; top: 10%; left: 10%;"></div>
+    <div class="particle" style="width: 400px; height: 400px; bottom: 10%; right: 10%;"></div>
+</div>
 
-<div class="ui-card">
-    <div id="status">RADIO OFF</div>
+<div class="card">
+    <h2 style="margin: 0; color: var(--neon); letter-spacing: 5px;">DRUNFM</h2>
+    <div style="font-size: 12px; margin-bottom: 30px;">24/7 LIVE BROADCAST</div>
     <button id="playBtn">▶</button>
-    <div style="font-size: 12px; color: #888;">VOLUME</div>
-    <input type="range" id="volRange" min="0" max="100" value="80">
+    <input type="range" id="vol" min="0" max="100" value="80">
     <div id="player"></div>
 </div>
 
@@ -58,30 +60,17 @@
 <script>
     let player;
     const btn = document.getElementById('playBtn');
-    const status = document.getElementById('status');
-
+    
     function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-            videoId: 'eZJx14UhktY',
-            events: { 
-                'onReady': () => {
-                    document.getElementById('volRange').addEventListener('input', (e) => player.setVolume(e.target.value));
-                    btn.addEventListener('click', toggle);
-                }
+        player = new YT.Player('player', { videoId: 'eZJx14UhktY', events: {
+            'onReady': () => {
+                document.getElementById('vol').addEventListener('input', (e) => player.setVolume(e.target.value));
+                btn.addEventListener('click', () => {
+                    if (player.getPlayerState() === 1) { player.pauseVideo(); btn.innerText = "▶"; }
+                    else { player.playVideo(); btn.innerText = "⏸"; }
+                });
             }
-        });
-    }
-
-    function toggle() {
-        if (player.getPlayerState() === 1) {
-            player.pauseVideo();
-            btn.innerText = "▶";
-            status.innerText = "RADIO OFF";
-        } else {
-            player.playVideo();
-            btn.innerText = "⏸";
-            status.innerText = "LIVE 24/7";
-        }
+        }});
     }
 </script>
 </body>
