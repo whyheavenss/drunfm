@@ -2,75 +2,303 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>DRUNFM | PRO UI</title>
+    <title>DRUNFM | LIVE</title>
     <style>
-        :root { --neon: #bd00ff; --dark: #050505; }
-        body { 
-            margin: 0; height: 100vh; overflow: hidden;
-            background: radial-gradient(circle at center, #1a0033 0%, #000 100%);
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'Inter', sans-serif;
+        :root {
+            /* Цвета с картинки: глубокий фиолетовый и яркий неон */
+            --primary: #a200ff; 
+            --neon-glow: #e600ff;
+            --bg-dark: #0a0014;
+            --card-bg: rgba(20, 0, 35, 0.6);
+            --text: #ffffff;
+            --subtext: #b388ff;
         }
 
-        /* Анимированные частицы фона */
-        .particles { position: absolute; width: 100%; height: 100%; z-index: -1; }
-        .particle { 
-            position: absolute; border-radius: 50%; opacity: 0.3;
-            background: var(--neon); filter: blur(50px);
-            animation: drift 15s infinite alternate;
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            /* Добавляем радиальный градиент для глубины, как на фото */
+            background-image: radial-gradient(circle at center, #230046 0%, #05000a 100%);
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: var(--text);
+            overflow: hidden;
+            position: relative;
         }
 
-        /* Панель управления */
-        .card { 
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 50px; border-radius: 40px; text-align: center;
+        /* --- Фоновые объекты (имитация текста и фигур с картинки) --- */
+        .bg-elements {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .floating-text {
+            position: absolute;
+            color: rgba(162, 0, 255, 0.15);
+            font-size: 8rem;
+            font-weight: 900;
+            letter-spacing: 20px;
+            white-space: nowrap;
+            transform: rotate(-15deg);
+            animation: float 20s linear infinite;
+        }
+        
+        .ft-1 { top: -5%; left: -10%; }
+        .ft-2 { bottom: 10%; right: -20%; font-size: 12rem; opacity: 0.1; }
+
+        @keyframes float {
+            0% { transform: rotate(-15deg) translate(0, 0); }
+            50% { transform: rotate(-15deg) translate(30px, -30px); }
+            100% { transform: rotate(-15deg) translate(0, 0); }
+        }
+
+        /* --- Контейнер плеера --- */
+        .player-container {
+            position: relative;
+            text-align: center;
+            width: 380px;
+            z-index: 10;
+        }
+
+        /* --- Неоновое свечение позади круга --- */
+        .glow {
+            position: absolute;
+            top: 35%; /* Чуть выше центра */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            background: var(--neon-glow);
+            filter: blur(120px);
+            opacity: 0.3;
+            border-radius: 50%;
+            z-index: -1;
+            transition: opacity 0.5s;
+        }
+
+        .playing .glow {
+            opacity: 0.6;
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        /* --- Центральный круг (Визуализатор + Кнопка) --- */
+        .central-control {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 40px auto;
+            cursor: pointer;
+        }
+
+        /* Визуализатор-кольцо */
+        .visualizer-ring {
+            position: absolute;
+            inset: -15px;
+            border-radius: 50%;
+            border: 2px dashed rgba(162, 0, 255, 0.3);
+            z-index: 1;
+            transition: border-color 0.3s;
+        }
+
+        .playing .visualizer-ring {
+            animation: spin 15s linear infinite;
+            border-color: var(--neon-glow);
+            box-shadow: 0 0 20px rgba(230, 0, 255, 0.2) inset;
+        }
+
+        /* Сама кнопка (в виде диска) */
+        #playBtn {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            /* Эффект стекла */
+            background: rgba(20, 0, 35, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(162, 0, 255, 0.5);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8) inset;
+        }
+
+        #playBtn:hover {
+            border-color: var(--neon-glow);
+            box-shadow: 0 0 40px rgba(230, 0, 255, 0.4) inset, 0 0 20px rgba(162, 0, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .play-icon { margin-left: 8px; } /* Центровка треугольника */
+        .pause-icon { display: none; }
+        .playing .play-icon { display: none; }
+        .playing .pause-icon { display: block; }
+
+        /* --- Нижняя панель (Инфо + Громкость) --- */
+        .info-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            padding: 25px 30px;
+            border-radius: 25px;
+            border: 1px solid rgba(162, 0, 255, 0.2);
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        #playBtn { 
-            width: 100px; height: 100px; border-radius: 50%; border: 2px solid white;
-            background: transparent; color: white; font-size: 30px; cursor: pointer;
-            transition: 0.4s; margin-bottom: 30px;
+        h1 { 
+            margin: 0 0 5px 0; 
+            font-size: 1.8rem; 
+            font-weight: 800; 
+            letter-spacing: 2px;
+            /* Текст с градиентом */
+            background: linear-gradient(90deg, #fff, #e600ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        #playBtn:hover { background: white; color: var(--neon); transform: scale(1.1); }
+        
+        #status {
+            font-size: 0.85rem;
+            color: var(--subtext);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+        }
 
-        input[type=range] { width: 100%; accent-color: var(--neon); }
+        .playing #status {
+            color: var(--neon-glow);
+            text-shadow: 0 0 10px rgba(230, 0, 255, 0.5);
+        }
 
-        @keyframes drift { 0% { transform: translate(0,0); } 100% { transform: translate(50px, 100px); } }
+        /* Ползунок громкости */
+        .vol-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .vol-icon { opacity: 0.7; }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        
+        input[type=range]:focus { outline: none; }
+        
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 6px; cursor: pointer;
+            background: rgba(162, 0, 255, 0.2);
+            border-radius: 10px;
+        }
+        
+        input[type=range]::-webkit-slider-thumb {
+            height: 16px; width: 16px; border-radius: 50%;
+            background: var(--text); cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -5px;
+            box-shadow: 0 0 10px var(--neon-glow);
+        }
+
+        /* --- Скрытый плеер YouTube --- */
+        #player { display: none; }
+
+        /* --- Ключевые кадры --- */
+        @keyframes pulse-glow {
+            from { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
+            to { transform: translate(-50%, -50%) scale(1.1); opacity: 0.7; }
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 
-<div class="particles">
-    <div class="particle" style="width: 300px; height: 300px; top: 10%; left: 10%;"></div>
-    <div class="particle" style="width: 400px; height: 400px; bottom: 10%; right: 10%;"></div>
+<!-- Фоновые объекты -->
+<div class="bg-elements">
+    <div class="floating-text ft-1">DRUNFM 24/7</div>
+    <div class="floating-text ft-2">DRUNFM</div>
 </div>
 
-<div class="card">
-    <h2 style="margin: 0; color: var(--neon); letter-spacing: 5px;">DRUNFM</h2>
-    <div style="font-size: 12px; margin-bottom: 30px;">24/7 LIVE BROADCAST</div>
-    <button id="playBtn">▶</button>
-    <input type="range" id="vol" min="0" max="100" value="80">
-    <div id="player"></div>
+<div class="player-container" id="appContainer">
+    <div class="glow"></div>
+
+    <!-- Центральный элемент (тот самый из прошлой версии) -->
+    <div class="central-control" onclick="toggleRadio()">
+        <div class="visualizer-ring"></div>
+        <button id="playBtn">
+            <svg class="play-icon" width="45" height="45" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="pause-icon" width="45" height="45" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"></rect><rect x="14" y="5" width="4" height="14"></rect></svg>
+        </button>
+    </div>
+
+    <!-- Панель управления -->
+    <div class="info-panel">
+        <h1>DRUNFM</h1>
+        <div id="status">ОЖИДАНИЕ</div>
+        
+        <div class="vol-container">
+            <svg class="vol-icon" width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            <input type="range" id="volRange" min="0" max="100" value="80">
+        </div>
+    </div>
 </div>
+
+<div id="player"></div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
     let player;
-    const btn = document.getElementById('playBtn');
-    
+    const appContainer = document.getElementById('appContainer');
+    const status = document.getElementById('status');
+    const vol = document.getElementById('volRange');
+
     function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', { videoId: 'eZJx14UhktY', events: {
-            'onReady': () => {
-                document.getElementById('vol').addEventListener('input', (e) => player.setVolume(e.target.value));
-                btn.addEventListener('click', () => {
-                    if (player.getPlayerState() === 1) { player.pauseVideo(); btn.innerText = "▶"; }
-                    else { player.playVideo(); btn.innerText = "⏸"; }
-                });
+        player = new YT.Player('player', {
+            videoId: 'eZJx14UhktY',
+            events: {
+                'onReady': (event) => {
+                    vol.addEventListener('input', (e) => player.setVolume(e.target.value));
+                },
+                'onStateChange': onPlayerStateChange
+            },
+        });
+    }
+
+    function toggleRadio() {
+        if (!player) return;
+        const state = player.getPlayerState();
+        if (state === 1) { 
+            player.pauseVideo();
+        } else {
+            player.playVideo();
+            appContainer.classList.add('playing');
+            status.innerText = "ПОДКЛЮЧЕНИЕ...";
+        }
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.PLAYING) {
+            appContainer.classList.add('playing');
+            status.innerText = "В ЭФИРЕ";
+        } else {
+            appContainer.classList.remove('playing');
+            if (event.data === YT.PlayerState.PAUSED) {
+                status.innerText = "ПАУЗА";
+            } else if (event.data === YT.PlayerState.BUFFERING) {
+                status.innerText = "ЗАГРУЗКА...";
             }
-        }});
+        }
     }
 </script>
 </body>
