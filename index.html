@@ -2,55 +2,55 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRUNFM | Live Radio</title>
     <style>
-        :root { --accent: #ff0000; --bg: #0a0a0a; }
-        body { margin: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; color: white; }
-        .card { background: #161616; padding: 2rem; border-radius: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); width: 320px; border: 1px solid #333; }
-        h1 { font-size: 1.5rem; margin-bottom: 20px; letter-spacing: 2px; }
-        #playBtn { width: 80px; height: 80px; background: var(--accent); border-radius: 50%; border: none; color: white; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
-        #playBtn:active { transform: scale(0.9); }
-        #status { margin-top: 15px; color: #888; font-size: 0.9rem; }
-        #player { display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body { 
+            margin: 0; background: #050505; color: white; 
+            font-family: 'Inter', sans-serif; display: flex; 
+            align-items: center; justify-content: center; height: 100vh;
+        }
+        .radio-card { 
+            background: #111; padding: 40px; border-radius: 30px; 
+            text-align: center; border: 1px solid #222;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.15); width: 300px;
+        }
+        .pulse { 
+            width: 80px; height: 80px; background: #ff0000; 
+            border-radius: 50%; margin: 0 auto 20px; 
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s;
+        }
+        .pulse:hover { transform: scale(1.1); box-shadow: 0 0 20px #ff0000; }
+        input[type=range] { width: 100%; margin-top: 20px; accent-color: #ff0000; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h1>DRUNFM LIVE</h1>
-    <button id="playBtn">PLAY</button>
-    <div id="status">Нажми, чтобы слушать</div>
-    <div id="player"></div>
+<div class="radio-card">
+    <div class="pulse" onclick="togglePlay()">▶</div>
+    <h2 id="status">DRUNFM</h2>
+    <input type="range" id="volume" min="0" max="1" step="0.1" value="1" oninput="setVolume(this.value)">
+    
+    <!-- Используем прокси-поток, который обходит ограничения YouTube -->
+    <audio id="audioPlayer">
+        <source src="https://yt.lemnoslife.com/audio/eZJx14UhktY" type="audio/mpeg">
+    </audio>
 </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    let player;
-    const btn = document.getElementById('playBtn');
+    const audio = document.getElementById('audioPlayer');
     const status = document.getElementById('status');
-
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-            videoId: 'eZJx14UhktY',
-            events: {
-                'onReady': () => {
-                    btn.addEventListener('click', () => {
-                        if (player.getPlayerState() === 1) {
-                            player.pauseVideo();
-                            btn.innerText = "PLAY";
-                            status.innerText = "На паузе";
-                        } else {
-                            player.playVideo();
-                            btn.innerText = "PAUSE";
-                            status.innerText = "Эфир в прямом эфире...";
-                        }
-                    });
-                },
-                'onError': () => status.innerText = "Ошибка стрима (ограничение автора)"
-            }
-        });
+    
+    function togglePlay() {
+        if (audio.paused) {
+            audio.play();
+            status.innerText = "LIVE NOW";
+        } else {
+            audio.pause();
+            status.innerText = "PAUSED";
+        }
     }
+    function setVolume(val) { audio.volume = val; }
 </script>
 </body>
 </html>
