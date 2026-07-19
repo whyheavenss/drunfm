@@ -2,55 +2,45 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRUNFM | Live Radio</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-        body { 
-            margin: 0; background: #050505; color: white; 
-            font-family: 'Inter', sans-serif; display: flex; 
-            align-items: center; justify-content: center; height: 100vh;
-        }
-        .radio-card { 
-            background: #111; padding: 40px; border-radius: 30px; 
-            text-align: center; border: 1px solid #222;
-            box-shadow: 0 0 50px rgba(255, 0, 0, 0.15); width: 300px;
-        }
-        .pulse { 
-            width: 80px; height: 80px; background: #ff0000; 
-            border-radius: 50%; margin: 0 auto 20px; 
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.3s;
-        }
-        .pulse:hover { transform: scale(1.1); box-shadow: 0 0 20px #ff0000; }
-        input[type=range] { width: 100%; margin-top: 20px; accent-color: #ff0000; }
+        body { margin: 0; background: #080808; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; color: white; }
+        .container { text-align: center; background: #1a1a1a; padding: 40px; border-radius: 30px; border: 1px solid #333; box-shadow: 0 0 30px rgba(255, 0, 0, 0.2); }
+        h1 { margin-bottom: 20px; color: #fff; }
+        #playBtn { padding: 20px 50px; font-size: 18px; cursor: pointer; background: #ff0000; border: none; color: white; border-radius: 50px; font-weight: bold; transition: 0.3s; }
+        #playBtn:hover { transform: scale(1.05); background: #d00000; }
+        #player { display: none; }
     </style>
 </head>
 <body>
 
-<div class="radio-card">
-    <div class="pulse" onclick="togglePlay()">▶</div>
-    <h2 id="status">DRUNFM</h2>
-    <input type="range" id="volume" min="0" max="1" step="0.1" value="1" oninput="setVolume(this.value)">
-    
-    <!-- Используем прокси-поток, который обходит ограничения YouTube -->
-    <audio id="audioPlayer">
-        <source src="https://yt.lemnoslife.com/audio/eZJx14UhktY" type="audio/mpeg">
-    </audio>
+<div class="container">
+    <h1>DRUNFM LIVE</h1>
+    <button id="playBtn">ВКЛЮЧИТЬ ЭФИР</button>
+    <div id="player"></div>
 </div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    const audio = document.getElementById('audioPlayer');
-    const status = document.getElementById('status');
-    
-    function togglePlay() {
-        if (audio.paused) {
-            audio.play();
-            status.innerText = "LIVE NOW";
-        } else {
-            audio.pause();
-            status.innerText = "PAUSED";
-        }
+    let player;
+    const btn = document.getElementById('playBtn');
+
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+            videoId: 'eZJx14UhktY',
+            playerVars: { 'autoplay': 1, 'controls': 0 },
+            events: {
+                'onReady': () => {
+                    btn.addEventListener('click', () => {
+                        player.playVideo();
+                        btn.innerText = "ИГРАЕТ...";
+                        btn.style.background = "#222";
+                    });
+                }
+            }
+        });
     }
-    function setVolume(val) { audio.volume = val; }
 </script>
 </body>
 </html>
