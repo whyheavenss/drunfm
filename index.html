@@ -2,22 +2,30 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRUNFM | Live Radio</title>
+    <title>DRUNFM | Radio Control</title>
     <style>
-        body { margin: 0; background: #080808; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; color: white; }
-        .container { text-align: center; background: #1a1a1a; padding: 40px; border-radius: 30px; border: 1px solid #333; box-shadow: 0 0 30px rgba(255, 0, 0, 0.2); }
-        h1 { margin-bottom: 20px; color: #fff; }
-        #playBtn { padding: 20px 50px; font-size: 18px; cursor: pointer; background: #ff0000; border: none; color: white; border-radius: 50px; font-weight: bold; transition: 0.3s; }
-        #playBtn:hover { transform: scale(1.05); background: #d00000; }
+        body { margin: 0; background: #050505; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; color: white; }
+        .card { background: #121212; padding: 3rem; border-radius: 40px; border: 1px solid #222; text-align: center; width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+        h1 { margin: 0 0 10px 0; font-size: 1.8rem; letter-spacing: -1px; }
+        #status { color: #ff3333; font-size: 0.8rem; margin-bottom: 2rem; text-transform: uppercase; }
+        
+        #playBtn { width: 90px; height: 90px; border-radius: 50%; border: none; background: #ff0000; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem; box-shadow: 0 0 20px rgba(255,0,0,0.3); }
+        #playBtn:hover { transform: scale(1.05); background: #ff2222; }
+        
+        .volume-box { margin-top: 30px; }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #ff0000; }
         #player { display: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>DRUNFM LIVE</h1>
-    <button id="playBtn">ВКЛЮЧИТЬ ЭФИР</button>
+<div class="card">
+    <h1>DRUNFM</h1>
+    <div id="status">ОТКЛЮЧЕНО</div>
+    <button id="playBtn">PLAY</button>
+    <div class="volume-box">
+        <input type="range" id="volRange" min="0" max="100" value="80">
+    </div>
     <div id="player"></div>
 </div>
 
@@ -25,21 +33,34 @@
 <script>
     let player;
     const btn = document.getElementById('playBtn');
+    const status = document.getElementById('status');
+    const vol = document.getElementById('volRange');
 
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
             videoId: 'eZJx14UhktY',
-            playerVars: { 'autoplay': 1, 'controls': 0 },
             events: {
                 'onReady': () => {
-                    btn.addEventListener('click', () => {
-                        player.playVideo();
-                        btn.innerText = "ИГРАЕТ...";
-                        btn.style.background = "#222";
-                    });
+                    btn.addEventListener('click', toggleRadio);
+                    vol.addEventListener('input', (e) => player.setVolume(e.target.value));
                 }
             }
         });
+    }
+
+    function toggleRadio() {
+        const state = player.getPlayerState();
+        if (state === 1) { // Если играет
+            player.pauseVideo();
+            btn.innerText = "PLAY";
+            status.innerText = "ПАУЗА";
+            status.style.color = "#666";
+        } else {
+            player.playVideo();
+            btn.innerText = "PAUSE";
+            status.innerText = "LIVE NOW";
+            status.style.color = "#00ff00";
+        }
     }
 </script>
 </body>
