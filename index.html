@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        button { padding: 20px 40px; font-size: 20px; background: red; color: white; border: none; border-radius: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <button id="btn">СЛУШАТЬ DRUNFM</button>
+    <div id="player"></div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let player;
+        document.getElementById('btn').onclick = function() {
+            this.style.display = 'none';
+            player = new YT.Player('player', {
+                height: '0',
+                width: '0',
+                videoId: 'eZJx14UhktY', // ID твоей трансляции
+                playerVars: { 'autoplay': 1, 'controls': 0 },
+                events: { 'onReady': (e) => e.target.playVideo() }
+            });
+        };
+    </script>
+</body>
+</html>
