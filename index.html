@@ -2,224 +2,86 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>DRUNFM | LIVE</title>
+    <title>DRUNFM | Control Center</title>
     <style>
-        :root {
-            --primary: #ff0000; /* Ярко-красный */
-            --bg: #0a0a0a;
-            --card-bg: #141414;
-            --text: #ffffff;
-            --subtext: #666666;
-        }
-
-        body {
-            margin: 0;
-            background-color: var(--bg);
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            color: var(--text);
-            overflow: hidden;
-        }
-
-        .player-container {
-            position: relative;
-            text-align: center;
-            width: 350px;
-        }
-
-        /* --- Эффект свечения позади --- */
-        .glow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px;
-            height: 200px;
-            background: var(--primary);
-            filter: blur(100px);
-            opacity: 0.2;
-            border-radius: 50%;
-            z-index: -1;
-            transition: opacity 0.5s;
-        }
-
-        .playing .glow {
-            opacity: 0.4; /* Ярче при воспроизведении */
-            animation: pulse-glow 2s infinite;
-        }
-
-        /* --- Центральный круг (Кнопка + Визуализатор) --- */
-        .central-control {
-            position: relative;
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 30px auto;
-            cursor: pointer;
-        }
-
-        #playBtn {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 2px solid #333;
-            color: var(--primary);
-            font-size: 3em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            z-index: 2;
-            padding-left: 5px; /* чтобы треугольник был ровным */
-        }
-
-        #playBtn:hover {
-            background: #1a1a1a;
-            border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-        }
-
-        /* Иконка паузы (скрыта по умолчанию) */
-        .pause-icon { display: none; }
-        .playing .play-icon { display: none; }
-        .playing .pause-icon { display: block; }
-
-        /* --- Визуализатор (имитация) --- */
-        .visualizer {
-            position: absolute;
-            inset: -10px; /* немного больше кнопки */
-            border-radius: 50%;
-            border: 2px solid transparent;
-            z-index: 1;
-        }
-
-        .playing .visualizer {
-            animation: rotate-visualizer 10s linear infinite;
-            border-top-color: var(--primary);
-        }
-
-        /* --- Текстовая часть --- */
-        .info-panel {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid #333;
-        }
-
-        h1 { margin: 0 0 5px 0; font-size: 1.4em; font-weight: 700; letter-spacing: 1px; }
+        :root { --neon: #bd00ff; --glass: rgba(255, 255, 255, 0.1); }
         
-        #status {
-            font-size: 0.8em;
-            color: var(--subtext);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: color 0.3s;
+        body { 
+            margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle, #2e004d 0%, #050505 100%);
+            font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden;
         }
 
-        .playing #status {
-            color: #00ff00; /* Зеленый в эфире */
-            font-weight: bold;
+        /* Анимация фона */
+        .bg-glow {
+            position: absolute; width: 600px; height: 600px;
+            background: var(--neon); filter: blur(150px); opacity: 0.15;
+            animation: move 10s infinite alternate; z-index: -1;
         }
 
-        /* --- Скрытый плеер YouTube --- */
+        @keyframes move { from { transform: translate(-20%, -20%); } to { transform: translate(20%, 20%); } }
+
+        .ui-card { 
+            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(20px);
+            padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
+            text-align: center; width: 300px; box-shadow: 0 0 40px rgba(189,0,255,0.2);
+        }
+
+        #playBtn { 
+            width: 80px; height: 80px; border-radius: 50%; border: none;
+            background: white; color: var(--neon); font-size: 30px; cursor: pointer;
+            margin-bottom: 20px; transition: 0.3s;
+        }
+        #playBtn:hover { transform: scale(1.1); box-shadow: 0 0 20px white; }
+
+        input[type=range] { 
+            width: 100%; margin-top: 20px; accent-color: var(--neon); cursor: pointer;
+        }
+        
+        #status { font-weight: bold; text-transform: uppercase; margin-bottom: 10px; color: var(--neon); }
         #player { display: none; }
-
-        /* --- Анимации --- */
-        @keyframes pulse-glow {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.2; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.4; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 0.2; }
-        }
-
-        @keyframes rotate-visualizer {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
 
-<div class="player-container" id="appContainer">
-    <div class="glow"></div>
+<div class="bg-glow"></div>
 
-    <div class="central-control" onclick="toggleRadio()">
-        <div class="visualizer"></div>
-        <button id="playBtn">
-            <!-- Треугольник Play -->
-            <svg class="play-icon" width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            <!-- Две полоски Pause -->
-            <svg class="pause-icon" width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"></rect><rect x="14" y="5" width="4" height="14"></rect></svg>
-        </button>
-    </div>
-
-    <div class="info-panel">
-        <h1>DRUNFM</h1>
-        <div id="status">Нажмите PLAY</div>
-    </div>
+<div class="ui-card">
+    <div id="status">RADIO OFF</div>
+    <button id="playBtn">▶</button>
+    <div style="font-size: 12px; color: #888;">VOLUME</div>
+    <input type="range" id="volRange" min="0" max="100" value="80">
+    <div id="player"></div>
 </div>
-
-<div id="player"></div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
     let player;
-    const appContainer = document.getElementById('appContainer');
+    const btn = document.getElementById('playBtn');
     const status = document.getElementById('status');
-    const playBtn = document.getElementById('playBtn');
 
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
-            videoId: 'eZJx14UhktY', // ID трансляции
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange,
-                'onError': onError
-            },
+            videoId: 'eZJx14UhktY',
+            events: { 
+                'onReady': () => {
+                    document.getElementById('volRange').addEventListener('input', (e) => player.setVolume(e.target.value));
+                    btn.addEventListener('click', toggle);
+                }
+            }
         });
     }
 
-    function onPlayerReady(event) {
-        // Плеер готов, но ждет клика пользователя (политика браузеров)
-    }
-
-    function toggleRadio() {
-        const state = player.getPlayerState();
-        if (state === 1) { // Если играет
+    function toggle() {
+        if (player.getPlayerState() === 1) {
             player.pauseVideo();
+            btn.innerText = "▶";
+            status.innerText = "RADIO OFF";
         } else {
             player.playVideo();
-            appContainer.classList.add('playing');
-            status.innerText = "Подключение...";
+            btn.innerText = "⏸";
+            status.innerText = "LIVE 24/7";
         }
-    }
-
-    function onPlayerStateChange(event) {
-        if (event.data === YT.PlayerState.PLAYING) {
-            appContainer.classList.add('playing');
-            status.innerText = "В ЭФИРЕ";
-            playBtn.style.color = "white"; // Меняем цвет иконки при игре
-        } else {
-            appContainer.classList.remove('playing');
-            if (event.data === YT.PlayerState.PAUSED) {
-                status.innerText = "Пауза";
-            } else if (event.data === YT.PlayerState.BUFFERING) {
-                status.innerText = "Буферизация...";
-            } else {
-                status.innerText = "Остановлено";
-            }
-            playBtn.style.color = "var(--primary)";
-        }
-    }
-
-    function onError(event) {
-        status.innerText = "Ошибка стрима";
-        console.error("YouTube Error:", event.data);
-        appContainer.classList.remove('playing');
     }
 </script>
 </body>
